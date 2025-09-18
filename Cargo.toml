@@ -1,0 +1,32 @@
+[package]
+name = "short"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Web + async
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+
+# DB
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "macros", "uuid", "chrono", "migrate"] }
+
+# Validation / hashing
+url = "2"
+nanoid = "0.4"
+
+# JSON & env
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dotenvy = "0.15"
+
+# Logging & middleware
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+tower-http = { version = "0.5", features = ["trace", "cors", "compression-br", "set-header"] }
+
+
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
