@@ -1,10 +1,7 @@
-use axum::{Json, Router, extract::{Path, State}, http::StatusCode, response::{IntoResponse, Redirect}, routing::{get, post}};
-use dotenvy::dotenv;
-use serde::{Deserialize, Serialize};
+use axum::{routing::{get, post}, Router};
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
-use tracing_subscriber::EnvFilter;
 mod handler;
 mod config;
 
@@ -33,16 +30,19 @@ async fn main() -> tokio::io::Result<()> {
         .route("/", get(handler::root))
         .route("/shorten", post(handler::shorten))
         .route("/r/:key", get(handler::redirect))
+        .route("/delete", post(handler::delete))
+        .route("/healthz/live", get(|| async { "ok" }))
+        .route("/healthz/ready", get(|| async { "ok" }))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
-    
+
     let port = configuration.port;
-    
+    tracing::info!("Starting server…");
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(addr).await?;
     tracing::info!("listening on port http://localhost:{port}");
     axum::serve(listener, app).await?;
-
+    tracing::info!("Server returned");
     Ok(())
 }

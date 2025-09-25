@@ -1,7 +1,8 @@
-use std::{env, fmt};
-use std::num::ParseIntError;
 use dotenvy::dotenv;
+use std::num::ParseIntError;
+use std::{env, fmt};
 
+// maybe use 'thiserror' crate in the future
 #[derive(Debug)]
 pub enum ConfigError {
     MissingDatabaseUrl,
@@ -19,18 +20,18 @@ pub fn configure_app() -> Result<Configuration, ConfigError> {
     //setup logging
     tracing_subscriber::fmt().init();
 
-    tracing::debug!("Configuring application...");
+    tracing::info!("Configuring application...");
     dotenv().ok();
-    tracing::debug!("dotenv enabled");
+    tracing::info!("dotenv enabled");
 
     let database_url = env::var("DATABASE_URL").map_err(|_| ConfigError::MissingDatabaseUrl)?;
-    tracing::debug!("database_url: {}", database_url);
+    tracing::info!("database_url: {}", database_url);
 
     let port = match env::var("PORT") {
         Ok(val) => val.parse::<u16>().map_err(ConfigError::InvalidPort)?,
-        Err(_) => 4000,
+        Err(_) => 3000,
     };
-    tracing::debug!("port: {}", port);
+    tracing::info!("port: {}", port);
     Ok(Configuration { database_url, port })
 }
 
@@ -54,5 +55,4 @@ impl fmt::Display for ConfigError {
     }
 }
 
-// Optional: implement std::error::Error so you can use `?` with things expecting `Error`
 impl std::error::Error for ConfigError {}
